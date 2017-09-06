@@ -55,14 +55,14 @@ Amazon's S3 or a compatability cloud storage service. The option below
 will enable that functionality.
 
 
-***Without S3 Upload Support***
+***Without S3 Support***
 
     admin:ADL_LRS$ fab setup_env
     admin:ADL_LRS$ source ../env/bin/activate
     (env)admin:ADL_LRS$
 
 
-***With S3 Upload Support***
+***With S3 Support***
     admin:ADL_LRS$ fab setup_env:s3
     admin:ADL_LRS$ source ../env/bin/activate
     (env)admin:ADL_LRS$
@@ -88,6 +88,8 @@ using the same form of authentication (*adl_lrs/settings.py* and *pg_hba.conf*) 
 given in *settings.py* are the same as those you created.
 
 <b>IMPORTANT:</b> You <b>MUST</b> setup celery for retrieving the activity metadata from the ID as well as voiding statements that might have come in out of order. Visit the [Using Celery](https://github.com/adlnet/ADL_LRS/wiki/Using-Celery) wiki page for installation instructions.
+
+<b>Note:</b> For S3 support run `fab set_lrs:s3`
 
 ## Starting
 
