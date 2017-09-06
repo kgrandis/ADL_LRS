@@ -1,0 +1,5 @@
+-r base.txt
+
+# To support S3 or Minio uploads
+boto3==1.4.7
+django-storages==1.6.5

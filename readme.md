@@ -41,10 +41,29 @@ This version is stable, but only intended to support a small amount of users as 
 
   Create a `settings.ini` file and place it in the `adl_lrs` directory. Visit the [Settings](https://github.com/adlnet/ADL_LRS/wiki/Settings) wiki page to set it up.
 
+***S3-specific settings***
+
+  For those installations that will be making use of S3 ensure that the
+relevant S3 settings are defined. For more information about enabling
+S3 support please see the [S3-related docs](docs/s3.md).
+
 
 **Setup the environment**
 
+Some installations may want to move storage of uploaded media to
+Amazon's S3 or a compatability cloud storage service. The option below
+will enable that functionality.
+
+
+***Without S3 Upload Support***
+
     admin:ADL_LRS$ fab setup_env
+    admin:ADL_LRS$ source ../env/bin/activate
+    (env)admin:ADL_LRS$
+
+
+***With S3 Upload Support***
+    admin:ADL_LRS$ fab setup_env:s3
     admin:ADL_LRS$ source ../env/bin/activate
     (env)admin:ADL_LRS$
 

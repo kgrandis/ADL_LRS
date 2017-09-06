@@ -3,14 +3,22 @@ import sys
 from fabric.api import local
 
 
-def setup_env():
+def setup_env(enable_s3=""):
+    if enable_s3 == "s3":
+        req_file="requirements/s3.txt"
+    else:
+        req_file="requirements/base.txt"
     INSTALL_STEPS = [
-        'virtualenv ../env;. ../env/bin/activate;pip install -r requirements.txt;deactivate']
+        'virtualenv ../env;. ../env/bin/activate;pip install -r {};deactivate'.format(req_file)]
     for step in INSTALL_STEPS:
         local(step)
 
+def setup_lrs(enable_s3=""):
+    if enable_s3 == "s3":
+        use_s3 = True
+    else:
+        use_s3 = False
 
-def setup_lrs():
     # Media folder names
     agent_profile = 'agent_profile'
     activity_profile = 'activity_profile'
@@ -52,18 +60,19 @@ def setup_lrs():
     from django.conf import settings
     adldir = settings.MEDIA_ROOT
 
-    # Create media directories
-    if not os.path.exists(os.path.join(adldir, activity_profile)):
-        os.makedirs(os.path.join(adldir, activity_profile))
+    if not use_s3:
+        # Create media directories
+        if not os.path.exists(os.path.join(adldir, activity_profile)):
+            os.makedirs(os.path.join(adldir, activity_profile))
 
-    if not os.path.exists(os.path.join(adldir, activity_state)):
-        os.makedirs(os.path.join(adldir, activity_state))
+        if not os.path.exists(os.path.join(adldir, activity_state)):
+            os.makedirs(os.path.join(adldir, activity_state))
 
-    if not os.path.exists(os.path.join(adldir, agent_profile)):
-        os.makedirs(os.path.join(adldir, agent_profile))
+        if not os.path.exists(os.path.join(adldir, agent_profile)):
+            os.makedirs(os.path.join(adldir, agent_profile))
 
-    if not os.path.exists(os.path.join(adldir, statement_attachments)):
-        os.makedirs(os.path.join(adldir, statement_attachments))
+        if not os.path.exists(os.path.join(adldir, statement_attachments)):
+            os.makedirs(os.path.join(adldir, statement_attachments))
 
     # Create cache tables and sync the db
     local('./manage.py createcachetable')

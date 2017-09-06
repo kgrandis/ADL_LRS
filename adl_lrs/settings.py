@@ -68,19 +68,43 @@ USE_TZ = True
 # Set this to True if you would like to utilize the webhooks functionality
 USE_HOOKS = config.getboolean('hooks', 'USE_HOOKS')
 
+
 # Absolute filesystem path to the directory that will hold user-uploaded files.
 # Example: "/home/media/media.lawrence.com/media/"
 MEDIA_ROOT = path.join(PROJECT_ROOT, 'media')
+
+# URL that handles the media served from MEDIA_ROOT. Make sure to use a
+# trailing slash.
+# Examples: "http://media.lawrence.com/media/", "http://example.com/media/"
+MEDIA_URL = '/media/'
+
+# S3
+try:
+    USE_S3 = config.getboolean('s3', 'USE_S3')
+except:
+    USE_S3 = False
+
+if USE_S3:
+    S3_USE_SIGV4 = True
+    AWS_STORAGE_BUCKET_NAME = config.get('s3', 'AWS_STORAGE_BUCKET_NAME')
+    AWS_ACCESS_KEY_ID = config.get('s3', 'AWS_ACCESS_KEY_ID')
+    AWS_SECRET_ACCESS_KEY = config.get('s3', 'AWS_SECRET_ACCESS_KEY')
+    AWS_LOCATION = config.get('s3','AWS_LOCATION')
+
+    AWS_S3_OBJECT_PARAMETERS = {
+        'CacheControl': 'max-age=86400',
+    }
+
+    DEFAULT_FILE_STORAGE = 'adl_lrs.aws.backends.MediaRootS3BotoStorage'
+    MEDIA_URL = '//{}.s3.amazonaws.com/media/'.format(AWS_STORAGE_BUCKET_NAME)
+    MEDIA_ROOT = MEDIA_URL
+
 # Paths for xapi media
 AGENT_PROFILE_UPLOAD_TO = "agent_profile"
 ACTIVITY_STATE_UPLOAD_TO = "activity_state"
 ACTIVITY_PROFILE_UPLOAD_TO = "activity_profile"
 STATEMENT_ATTACHMENT_UPLOAD_TO = "attachment_payloads"
 
-# URL that handles the media served from MEDIA_ROOT. Make sure to use a
-# trailing slash.
-# Examples: "http://media.lawrence.com/media/", "http://example.com/media/"
-MEDIA_URL = '/media/'
 
 # Absolute path to the directory static files should be collected to.
 # Don't put anything in this directory yourself; store your static files
@@ -269,6 +293,9 @@ INSTALLED_APPS = [
     'jsonify',
     'corsheaders',
 ]
+
+if USE_S3:
+    INSTALLED_APPS += ('storages', )
 
 REQUEST_HANDLER_LOG_DIR = path.join(PROJECT_ROOT, 'logs/django_request.log')
 DEFAULT_LOG_DIR = path.join(PROJECT_ROOT, 'logs/lrs.log')
