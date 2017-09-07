@@ -1,0 +1,37 @@
+version: '3'
+
+volumes:
+  postgres_data: {}
+  postgres_backup: {}
+
+services:
+  postgres:
+    image: postgres
+    environment:
+      POSTGRES_USER: postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - postgres_backup:/backups
+
+  lrsapp:
+    build:
+      context: .
+      dockerfile: ./deploy/compose/lrsapp/Dockerfile
+    depends_on:
+      - postgres
+    command: /gunicorn.sh
+    environment:
+      - READ_DOT_ENV_FILE=True
+    ports:
+      - "8000"
+    #env_file: .env
+
+  nginx:
+    build:
+      context: .
+      dockerfile: ./deploy/compose/nginx/Dockerfile
+    depends_on:
+      - lrsapp
+
+    ports:
+      - "0.0.0.0:80:80"

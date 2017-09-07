@@ -1,0 +1,48 @@
+[database]
+NAME: postgres
+USER: postgres
+PASSWORD: flopflop
+HOST: postgres
+PORT: 5432
+
+[email]
+EMAIL_BACKEND: django.core.mail.backends.smtp.EmailBackend
+EMAIL_HOST: localhost
+EMAIL_PORT: 465
+EMAIL_HOST_USER: <email_host_user>
+EMAIL_HOST_PASSWORD: <email_host_user_password>
+EMAIL_USE_SSL: True
+
+[debug]
+DEBUG: True
+
+[auth]
+ALLOW_EMPTY_HTTP_AUTH: False
+OAUTH_ENABLED: True
+
+[hooks]
+USE_HOOKS: False
+
+[preferences]
+SERVER_STMT_LIMIT: 100
+STMTS_PER_PAGE: 10
+TIME_ZONE: America/New_York
+LANGUAGE_CODE: en-US
+
+[secrets]
+SECRET_KEY: <django secret key>
+
+[ampq]
+USERNAME: <rabbituser>
+PASSWORD: <rabbitpassword>
+HOST: localhost
+HOST: localhost
+PORT: 5672
+VHOST: <rabbit vhost>
+
+[s3]
+USE_S3: True
+AWS_STORAGE_BUCKET_NAME: <bucketname>
+AWS_ACCESS_KEY_ID: <aws_access_key>
+AWS_SECRET_ACCESS_KEY: <aws_secret_key>
+AWS_LOCATION: <aws_location>
