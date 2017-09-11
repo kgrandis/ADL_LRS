@@ -9,7 +9,13 @@ runtests
 500.html
 media/
 federated-analytics.js
-*.conf
 lrs/celery.py
+
+# Project settings and environment variables
 *.ini
+*.conf
+adl_lrs/settings.ini
+adl_lrs/settings.env
+
+# static_root collection directory
 staticfiles/*

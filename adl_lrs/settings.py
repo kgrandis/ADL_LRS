@@ -1,40 +1,40 @@
 # Django settings for adl_lrs project.
 from os import path
 from os.path import dirname, abspath
-from ConfigParser import RawConfigParser
+import environ
 
 # Root of LRS
 SETTINGS_DIR = dirname(abspath(__file__))
 PROJECT_ROOT = dirname(dirname(SETTINGS_DIR))
 BASE_DIR = path.join(SETTINGS_DIR, '..')
 
-config = RawConfigParser()
-config.read(SETTINGS_DIR+'/settings.ini')
+# Load OS env variables
+env = environ.Env()
+
+DEFAULT_ENV_FILE = path.join(SETTINGS_DIR, 'settings.env')
+DOTENV_FILE = env('DOTENV_FILE', default=DEFAULT_ENV_FILE)
+
+print "Loading: {}".format(DOTENV_FILE)
+env.read_env(DOTENV_FILE)
+print ".env file loaded"
 
 
 # If you want to debug
-DEBUG = config.getboolean('debug', 'DEBUG')
+DEBUG = env.bool('DEBUG', default=False)
 
 # Set these email values to send the reset password link
 # If you do not want this functionality just comment out the
 # Forgot Password? link in templates/registration/login.html
-EMAIL_BACKEND = config.get('email', 'EMAIL_BACKEND')
-EMAIL_HOST = config.get('email', 'EMAIL_HOST')
-EMAIL_PORT = config.getint('email', 'EMAIL_PORT')
-EMAIL_HOST_USER = config.get('email', 'EMAIL_HOST_USER')
-EMAIL_HOST_PASSWORD = config.get('email', 'EMAIL_HOST_PASSWORD')
-EMAIL_USE_SSL = config.getboolean('email', 'EMAIL_USE_SSL')
+EMAIL_BACKEND = env('EMAIL_BACKEND', default="django.core.mail.backends.smtp.EmailBackend")
+EMAIL_HOST = env('EMAIL_HOST', default="localhost")
+EMAIL_PORT = env.int('EMAIL_PORT', default=465)
+EMAIL_HOST_USER = env('EMAIL_HOST_USER', default="")
+EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD', default="")
+EMAIL_USE_SSL = env.bool('EMAIL_USE_SSL', default=True)
 
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': config.get('database', 'NAME'),
-        'USER': config.get('database', 'USER'),
-        'PASSWORD': config.get('database', 'PASSWORD'),
-        'HOST': config.get('database', 'HOST'),
-        'PORT': config.getint('database', 'PORT'),
-    }
+    'default': env.db('DATABASE_URL', default='postgres://postgres'),
 }
 
 # Local time zone for this installation. Choices can be found here:
@@ -44,16 +44,16 @@ DATABASES = {
 # timezone as the operating system.
 # If running in a Windows environment this must be set to the same as your
 # system time zone.
-TIME_ZONE = config.get('preferences', 'TIME_ZONE')
+TIME_ZONE = env("TIME_ZONE", default="America/New_York")
 
 # Language code for this installation. All choices can be found here:
 # http://www.i18nguy.com/unicode/language-identifiers.html
-LANGUAGE_CODE = config.get('preferences', 'LANGUAGE_CODE')
+LANGUAGE_CODE = env('LANGUAGE_CODE', default='en-US')
 
 # The ID, as an integer, of the current site in the django_site database table.
 # This is used so that application data can hook into specific sites and a single database can manage
 # content for multiple sites.
-SITE_ID = 1
+SITE_ID = env.int("SITE_ID", default=1)
 
 # If you set this to False, Django will make some optimizations so as not
 # to load the internationalization machinery.
@@ -67,7 +67,7 @@ USE_L10N = True
 USE_TZ = True
 
 # Set this to True if you would like to utilize the webhooks functionality
-USE_HOOKS = config.getboolean('hooks', 'USE_HOOKS')
+USE_HOOKS = env.bool('USE_HOOKS', default=False)
 
 
 # Absolute filesystem path to the directory that will hold user-uploaded files.
@@ -80,24 +80,21 @@ MEDIA_ROOT = path.join(PROJECT_ROOT, 'media')
 MEDIA_URL = '/media/'
 
 # S3
-try:
-    USE_S3 = config.getboolean('s3', 'USE_S3')
-except:
-    USE_S3 = False
+USE_S3 = env.bool('USE_S3', default=False)
 
 if USE_S3:
     S3_USE_SIGV4 = True
-    AWS_STORAGE_BUCKET_NAME = config.get('s3', 'AWS_STORAGE_BUCKET_NAME')
-    AWS_ACCESS_KEY_ID = config.get('s3', 'AWS_ACCESS_KEY_ID')
-    AWS_SECRET_ACCESS_KEY = config.get('s3', 'AWS_SECRET_ACCESS_KEY')
-    AWS_LOCATION = config.get('s3','AWS_LOCATION')
+    AWS_STORAGE_BUCKET_NAME = env('AWS_STORAGE_BUCKET_NAME')
+    AWS_ACCESS_KEY_ID = env('AWS_ACCESS_KEY_ID')
+    AWS_SECRET_ACCESS_KEY = env('AWS_SECRET_ACCESS_KEY')
+    AWS_LOCATION = env('AWS_LOCATION', default='us-east-1')
 
     AWS_S3_OBJECT_PARAMETERS = {
         'CacheControl': 'max-age=86400',
     }
 
     DEFAULT_FILE_STORAGE = 'adl_lrs.aws.backends.MediaRootS3BotoStorage'
-    MEDIA_URL = '//{}.s3.amazonaws.com/media/'.format(AWS_STORAGE_BUCKET_NAME)
+    MEDIA_URL = '//{}.s3-{}.amazonaws.com/media/'.format(AWS_STORAGE_BUCKET_NAME, AWS_LOCATION)
     MEDIA_ROOT = MEDIA_URL
 
 # Paths for xapi media
@@ -133,11 +130,11 @@ XAPI_VERSIONS = ['1.0.0', '1.0.1', '1.0.2', XAPI_VERSION]
 LOGIN_REDIRECT_URL = '/me'
 
 # Me view has a tab of user's statements
-STMTS_PER_PAGE = config.getint('preferences', 'STMTS_PER_PAGE')
+STMTS_PER_PAGE = env.int('STMTS_PER_PAGE', default=10)
 
 # Whether HTTP auth or OAuth is enabled
-ALLOW_EMPTY_HTTP_AUTH = config.getboolean('auth', 'ALLOW_EMPTY_HTTP_AUTH')
-OAUTH_ENABLED = config.getboolean('auth', 'OAUTH_ENABLED')
+ALLOW_EMPTY_HTTP_AUTH = env.bool('ALLOW_EMPTY_HTTP_AUTH', default=False)
+OAUTH_ENABLED = env.bool('OAUTH_ENABLED', default=True)
 
 AUTH_USER_MODEL = "auth.User"
 # OAuth1 callback views
@@ -167,11 +164,11 @@ OAUTH_SCOPES = (
     (ALL, 'all')
 )
 
-AMPQ_USERNAME = config.get('ampq', 'USERNAME')
-AMPQ_PASSWORD = config.get('ampq', 'PASSWORD')
-AMPQ_HOST = config.get('ampq', 'HOST')
-AMPQ_PORT = config.getint('ampq', 'PORT')
-AMPQ_VHOST = config.get('ampq', 'VHOST')
+AMPQ_USERNAME = env('RABBIT_USERNAME', default="lrs")
+AMPQ_PASSWORD = env('RABBIT_PASSWORD', default="")
+AMPQ_HOST = env('RABBIT_HOST', default='rabbitmq')
+AMPQ_PORT = env.int('RABBIT_PORT', default=5672)
+AMPQ_VHOST = env('RABBIT_VHOST', default='lrs')
 
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
@@ -180,7 +177,7 @@ CELERY_STORE_ERRORS_EVEN_IF_IGNORED = True
 CELERY_IGNORE_RESULT = True
 
 # Limit on number of statements the server will return
-SERVER_STMT_LIMIT = config.getint('preferences', 'SERVER_STMT_LIMIT')
+SERVER_STMT_LIMIT = env.int('SERVER_STMT_LIMIT', default=100)
 # Fifteen second timeout to all celery tasks
 CELERYD_TASK_SOFT_TIME_LIMIT = 15
 # ActivityID resolve timeout (seconds)
@@ -209,7 +206,7 @@ STATICFILES_FINDERS = (
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Make this unique, and don't share it with anybody.
-SECRET_KEY = config.get('secrets', 'SECRET_KEY')
+SECRET_KEY = env('DJANGO_SECRET_KEY')
 
 TEMPLATES = [
     {
